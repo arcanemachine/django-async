@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # local
+    'chat.apps.ChatConfig',
 ]
 
 MIDDLEWARE = [
@@ -122,4 +124,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# asgi
 ASGI_APPLICATION = 'django_async.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}

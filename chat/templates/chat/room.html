@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Rooms</title>
+</head>
+<body>
+
+  <h1>{{ room_name|capfirst }}</h1>
+
+  <textarea id="chat-log" cols="75" rows="20"></textarea>
+  <br>
+  <input id="chat-message-input" type="text" size="60">
+  <input id="chat-message-submit" type="button" value="Send">
+  
+
+  {{ room_name|json_script:"room-name" }}
+  
+  <script>
+
+let hello = 'world';
+
+const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+const chatSocket = new WebSocket(
+  'ws://'
+  + window.location.host
+  + '/ws/chat/'
+  + roomName
+  + '/'
+);
+
+// if a message is received from the server, append it to the chat log
+chatSocket.onmessage = function(e) {
+  const data = JSON.parse(e.data);
+  document.querySelector('#chat-log').value += (data.message + '\n');
+};
+
+// if socket closes, report an error in the console
+chatSocket.onclose = function(e) {
+  console.error('Chat socket closed unexpectedly');
+}
+
+// focus text input on page load
+document.querySelector('#chat-message-input').focus();
+
+// if enter button pressed, perform the submit function
+document.querySelector('#chat-message-input').onkeyup = function(e) {
+  if (e.keyCode === 13) {
+    document.querySelector('#chat-message-submit').click();
+  }
+};
+
+// on submit, send the JSON message using the WebSocket
+document.querySelector('#chat-message-submit').onclick = function(e) {
+  const messageInputDom = document.querySelector('#chat-message-input');
+  const message = messageInputDom.value;
+  chatSocket.send(JSON.stringify({
+    'message': message
+  }));
+  messageInputDom.value = '';
+}
+
+  </script>
+</body>
+</html>
